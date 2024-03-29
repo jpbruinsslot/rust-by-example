@@ -12,7 +12,7 @@ fn main() {
     // Initialize a new vector with the `vec!` macro
     let mut v = vec![1, 2, 3, 4, 5];
 
-    // We can explcicitly declare the type of the vector
+    // We can explicitly declare the type of the vector
     let mut vec_explicit = Vec::<i32>::new();
     vec_explicit.push(1);
     vec_explicit.push(2);
