@@ -8,7 +8,6 @@
 // for the most common methods and operations that can be performed on vectors.
 
 fn main() {
-
     // Initialize a new vector with the `vec!` macro
     let mut v = vec![1, 2, 3, 4, 5];
 
