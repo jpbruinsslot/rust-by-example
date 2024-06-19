@@ -1,5 +1,5 @@
 # Language: shell
-# Traits
 $ rustc traits.rs
 $ ./traits
-Traits
+Area: 85
+Area: 200

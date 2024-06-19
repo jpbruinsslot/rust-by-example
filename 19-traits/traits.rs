@@ -9,6 +9,7 @@
 // related by inheritance.
 
 fn main() {
+
     // Define a trait named `Shape` with a method signature named `area`.
     trait Shape {
         fn area(&self) -> f64;
