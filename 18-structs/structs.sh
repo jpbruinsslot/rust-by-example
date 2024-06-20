@@ -1,5 +1,4 @@
 # Language: shell
-# Structs
 $ rustc structs.rs
-$ ./strucst
-Structs
+$ ./structs
+The area of the rect1 is 1500
