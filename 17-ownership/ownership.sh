@@ -1,5 +1,4 @@
 # Language: shell
-# Ownership and Borrowing
-$ rustc ownership-borrowing.rs
+$ rustc ownership.rs
 $ ./ownership-borrowing
-Ownership and Borrowing
+hello
