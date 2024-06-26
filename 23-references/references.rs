@@ -3,5 +3,5 @@
 
 fn main() {
     // References
-    println!("References")
+    println!("References");
 }

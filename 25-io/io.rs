@@ -3,5 +3,5 @@
 
 fn main() {
     // I/O
-    println!("I/O")
+    println!("I/O");
 }

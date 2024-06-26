@@ -3,5 +3,5 @@
 
 fn main() {
     // Concurrency
-    println!("Concurrency")
+    println!("Concurrency");
 }

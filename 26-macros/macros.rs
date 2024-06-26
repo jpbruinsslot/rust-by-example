@@ -3,5 +3,5 @@
 
 fn main() {
     // Macros
-    println!("Macros")
+    println!("Macros");
 }

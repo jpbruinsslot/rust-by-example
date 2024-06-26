@@ -3,5 +3,5 @@
 
 fn main() {
     // Error Handling
-    println!("Error Handling")
+    println!("Error Handling");
 }
