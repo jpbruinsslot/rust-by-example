@@ -31,7 +31,7 @@ fn main() {
 
     // Tuples, if all members are types that are valid for constants
     const TUPLE: (u32, f32, bool, char) = (ONE, PI, TRUE, CRAB);
-    println!("{:?}", FOO_BAR);
+    println!("{:?}", TUPLE);
 
     // Arrays, if all members are types that are valid for constants
     const ARRAY: [u32; 3] = [ONE, ONE, ONE];
