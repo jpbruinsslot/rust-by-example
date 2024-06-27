@@ -1,8 +1,8 @@
 // Title: If/Else
 // Language: rust
 //
-// The `if` statement assesses a conditional expression, determining the control flow based on
-// whether the expression evaluates to true or false.
+// The `if` statement assesses a conditional expression, determining the
+// control flow based on whether the expression evaluates to true or false.
 
 fn main() {
 
@@ -13,6 +13,15 @@ fn main() {
         println!("false");
     } else {
         println!("neither");
+    }
+
+    // Rust supports six comparison operators: `==`, `!=`, `<`,` >`, `<=`, `>=`.
+    // and two boolean operators: `&&` (and) and `||` (or).
+    let n = 42;
+    if n > 0 && n < 100 {
+        println!("n is between 0 and 100");
+    } else if n < 0 || n > 100 {
+        println!("n is not between 0 and 100");
     }
 
     // The `if` statement can return a value and can be used in a `let`
