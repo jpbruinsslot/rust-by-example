@@ -3,5 +3,5 @@
 
 fn main() {
     // Generics
-    println!("Generics")
+    println!("Generics");
 }
