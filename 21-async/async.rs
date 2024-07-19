@@ -3,5 +3,5 @@
 
 fn main() {
     // Async
-    println!("Async")
+    println!("Async");
 }
