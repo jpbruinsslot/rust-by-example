@@ -9,7 +9,7 @@
 #![allow(unused)]
 fn main() {
 
-    // Defining a **named-field** struct, with fields and methods. The naming
+    // Defining a **Named-Field** struct, with fields and methods. The naming
     // convention for structs is `CamelCase`.
     struct Rectangle {
         width: u32,
@@ -21,7 +21,6 @@ fn main() {
     // These are called associated functions and follow the `snake_case` naming
     // convention.
     impl Rectangle {
-
         // Associated functions that don't take a struct instance as a parameter
         // are called *type-associated* functions, commonly used as
         // constructors or utility functions.
@@ -42,8 +41,7 @@ fn main() {
         // so the instance is not consumed when the method is called. Use this
         // when a method only needs to read, not modify, the instance.
         fn can_hold(&self, other: &Rectangle) -> bool {
-            self.width > other.width
-                && self.height > other.height
+            self.width > other.width && self.height > other.height
         }
 
         // In this example, the method borrows the instance by using `&mut self`,
@@ -52,6 +50,13 @@ fn main() {
         fn increase_size(&mut self, width: u32, height: u32) {
             self.width += width;
             self.height += height;
+        }
+
+        // We can also return Self from a method, which is useful for chaining
+        // method calls.
+        fn set_width(mut self, width: u32) -> Self {
+            self.width = width;
+            self
         }
     }
 
@@ -103,12 +108,42 @@ fn main() {
     }
 
     // Rust allows multiple `impl` blocks for a struct, which is useful for
-    // separating methods into different files for large structs.
+    // separating methods into different files for large structs. Here we
+    // define a separate `impl` block for the `Rectangle` struct that we
+    // defined earlier.
     impl Rectangle {
         fn print(&self) {
             println!(
                 "Rectangle: {} x {}", self.width, self.height,
             );
+        }
+    }
+
+    // We can set default values for struct fields using the `Default` trait.
+    #[derive(Default)]
+    struct Point {
+        x: i32,
+        y: i32,
+    }
+
+    // We can instantiate a struct with default values using the `Default` trait.
+    let point = Point::default();
+
+    // We can also override some of the default values, when instantiating the
+    // struct.
+    let other_point = Point {
+        x: 10,
+        ..Point::default()
+    };
+
+    // We can also implement the `Default` trait for our own structs.
+    // This is useful when we want to provide a custom default values.
+    impl Default for Rectangle {
+        fn default() -> Rectangle {
+            Rectangle {
+                width: 10,
+                height: 10,
+            }
         }
     }
 }
