@@ -9,6 +9,16 @@
 #![allow(unused)]
 fn main() {
 
+    // **Unit-like** structs have no fields and are useful for implementing a
+    // trait on a type without storing any data in the type itself.
+    struct UnitLike;
+
+    // **Tuple-like** structs have unnamed fields and are useful for giving a
+    // tuple a name, making it a distinct type from other tuples where naming
+    // the fields would be redundant.
+    struct Color(u8, u8, u8);
+    let black = Color(0, 0, 0);
+
     // Defining a **Named-Field** struct, with fields and methods. The naming
     // convention for structs is `CamelCase`.
     struct Rectangle {
@@ -41,7 +51,8 @@ fn main() {
         // so the instance is not consumed when the method is called. Use this
         // when a method only needs to read, not modify, the instance.
         fn can_hold(&self, other: &Rectangle) -> bool {
-            self.width > other.width && self.height > other.height
+            self.width > other.width 
+                && self.height > other.height
         }
 
         // In this example, the method borrows the instance by using `&mut self`,
@@ -52,7 +63,7 @@ fn main() {
             self.height += height;
         }
 
-        // We can also return Self from a method, which is useful for chaining
+        // We can also return `Self` from a method, which is useful for chaining
         // method calls.
         fn set_width(mut self, width: u32) -> Self {
             self.width = width;
@@ -60,7 +71,7 @@ fn main() {
         }
     }
 
-    // Creating an instance of the Rectangle struct
+    // Creating an instance of the `Rectangle` struct
     let rect1 = Rectangle {
         width: 30,
         height: 50,
@@ -85,26 +96,6 @@ fn main() {
     pub struct Person {
         pub name: String,
         age: u8,
-    }
-
-    // **Tuple-like** structs have unnamed fields and are useful for giving a
-    // tuple a name, making it a distinct type from other tuples where naming
-    // the fields would be redundant.
-    struct Color(u8, u8, u8);
-    let black = Color(0, 0, 0);
-
-    // **Unit-like** structs have no fields and are useful for implementing a
-    // trait on a type without storing any data in the type itself.
-    struct UnitLike;
-
-    impl UnitLike {
-        fn new() -> UnitLike {
-            UnitLike
-        }
-
-        fn print(&self) {
-            println!("Unit-like struct");
-        }
     }
 
     // Rust allows multiple `impl` blocks for a struct, which is useful for
