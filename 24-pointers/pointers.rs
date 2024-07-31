@@ -1,5 +1,15 @@
-// Title: *Coming* Pointers
+// Title: Pointers
 // Language: Rust
+//
+// Rust has two types of pointers that are used to used to manage memory and
+// ownership. These are: *owning pointers* (`Box`, `Rc`, `Arc`), and
+// *non-owning pointers* (references: `&`, `&mut`; raw-pointers: `*const`, `*mut`).
+// Owning pointers allocate memory on the heap and are responsible for cleaning
+// up the memory when they go out of scope. Non-owning pointers are used to
+// borrow values without taking ownership of them. They do not manage the memory
+// they point to, they simply provide access to the data, without affecting its
+// ownership.
+
 use std::cell::RefCell;
 use std::mem::drop;
 use std::rc::Rc;
@@ -7,9 +17,9 @@ use std::sync::{Arc, Mutex};
 
 fn main() {
     // `&` is used to create a reference to a value, and it allows us to
-    // *borrow* the value without taking ownership of it. As such, the lifetime
-    // of the reference depends on its owner and is limited to the scope in
-    // which it was created.
+    // *borrow* the value without taking ownership of it. This is also known as
+    // a *shared reference*. As such, the lifetime of the reference depends on
+    // its owner and is limited to the scope in which it was created.
     let mut x = 5;
 
     // `r` is a immutable reference to `x`.
@@ -17,10 +27,6 @@ fn main() {
 
     // `r` is a mutable reference to `x`.
     let r2 = &mut x;
-
-    // TODO: Therefore we would need to add lifetime annotations to the function
-    // signature to ensure that the reference is valid for the duration of the
-    // function call.
 
     // The raw pointer `*const T` is a non-owning pointer that does not implement
     // any automatic cleanup. It is a simple C-style pointer that is used when
