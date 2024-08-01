@@ -15,6 +15,7 @@ use std::mem::drop;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 
+#[allow(unused_variables)]
 fn main() {
     // `&` is used to create a reference to a value, and it allows us to
     // *borrow* the value without taking ownership of it. This is also known as
@@ -48,16 +49,22 @@ fn main() {
     // is dropped. Choose `Rc` when you want to have multiple owners of the same
     // data in a single-threaded context.
     let rc1 = Rc::new(5);
-    let rc2 = rc.clone();
-    let rc3 = Rc::clone(&rc);
+
+    // `Rc::clone` is used to create a new reference to the same data. It does
+    // not create a deep copy of the data, it simply increments the reference
+    // count.
+    let rc2 = Rc::clone(&rc1);
+
+    // `Rc::clone` can also be called using the `clone` method.
+    let rc3 = rc1.clone();
 
     // `Arc` is an atomic reference-counted smart pointer. It is the atomic
     // version of `Rc`, which is safe to use in concurrent contexts. Choose `Arc`
     // when you want to have multiple owners of the same data in a multi-threaded
     // context.
     let arc1 = Arc::new(5);
-    let arc2 = arc.clone();
-    let arc3 = Arc::clone(&arc);
+    let arc2 = Arc::clone(&arc1);
+    let arc3 = arc1.clone();
 
     // `RefCell` (Reference Cell) is a type that enforces the borrowing rules
     // at runtime instead of compile time. It is useful when you need to mutate
@@ -66,12 +73,16 @@ fn main() {
     // borrowing rules by mutating immutable references. This pattern is often
     // referred to as *interior mutability*.
     let refcell1 = RefCell::new(5);
+    println!("{:?}", refcell1);
 
     // `Ref` - immutable borrow
     let refcell2 = refcell1.borrow();
 
+    // FIXME: Already borrowed
     // `RefMut` - mutable borrow
-    let refcell3 = refcell1.borrow_mut();
+    let mut refcell3 = refcell1.borrow_mut();
+    *refcell3 += 1;
+    println!("{:?}", *refcell1.borrow());
 
     // The `Mutex` type is a mutual exclusion primitive useful for protecting
     // shared data. Mutexes are a way to ensure that only one thread can access
@@ -81,7 +92,7 @@ fn main() {
     let mutex = Mutex::new(5);
 
     // Lock the mutex to access the data
-    let mutex_guard = mutex.lock().unwrap();
+    let mut mutex_guard = mutex.lock().unwrap();
 
     // Dereference the mutex guard to access the data, and then increment the
     // value.
