@@ -14,8 +14,9 @@ use std::cell::RefCell;
 use std::mem::drop;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
+use std::thread;
 
-#[allow(unused_variables)]
+#[allow(unused_variables, dead_code)]
 fn main() {
     // `&` is used to create a reference to a value, and it allows us to
     // *borrow* the value without taking ownership of it. This is also known as
@@ -47,16 +48,25 @@ fn main() {
     // `Rc` is a reference-counted smart pointer. It keeps track of the number of
     // references to a value and only cleans up the value when the last reference
     // is dropped. Choose `Rc` when you want to have multiple owners of the same
-    // data in a single-threaded context.
+    // data in single-threaded context.
     let rc1 = Rc::new(5);
+    println!("reference count of rc1: {}", Rc::strong_count(&rc1));
 
-    // `Rc::clone` is used to create a new reference to the same data. It does
-    // not create a deep copy of the data, it simply increments the reference
-    // count.
-    let rc2 = Rc::clone(&rc1);
+    {
+        // `Rc::clone` is used to create a new reference to the same data. It does
+        // not create a deep copy of the data, it simply increments the reference
+        // count.
+        let rc2 = Rc::clone(&rc1);
+        println!("reference count of rc1: {}", Rc::strong_count(&rc1));
 
-    // `Rc::clone` can also be called using the `clone` method.
-    let rc3 = rc1.clone();
+        // `Rc::clone` can also be called using the `clone` method.
+        let rc3 = rc1.clone();
+        println!("reference count of rc1: {}", Rc::strong_count(&rc1));
+    }
+
+    // The reference count of `rc1` is now 1, since `rc2` and `rc3` have gone out
+    // of scope.
+    println!("reference count of rc1: {}", Rc::strong_count(&rc1));
 
     // `Arc` is an atomic reference-counted smart pointer. It is the atomic
     // version of `Rc`, which is safe to use in concurrent contexts. Choose `Arc`
@@ -66,23 +76,67 @@ fn main() {
     let arc2 = Arc::clone(&arc1);
     let arc3 = arc1.clone();
 
+    let thread1 = thread::spawn(move || {
+        println!(
+            "reference count of arc in thread1: {}",
+            Arc::strong_count(&arc2),
+        );
+    });
+
+    let thread2 = thread::spawn(move || {
+        println!(
+            "reference count of arc in thread2: {}",
+            Arc::strong_count(&arc3),
+        );
+    });
+
+    thread1.join().unwrap();
+    thread2.join().unwrap();
+
+    // At this point, arc2 and arc3 are out of scope, only arc1 remains
+    println!("reference count of arc1: {}", Arc::strong_count(&arc1));
+
     // `RefCell` (Reference Cell) is a type that enforces the borrowing rules
-    // at runtime instead of compile time. It is useful when you need to mutate
-    // data that is behind an immutable reference. It is also useful when you
-    // need to have multiple mutable references to the same data. It circumvents
+    // at runtime instead of compile time. It allows you to mutate data even
+    // when there are immutable references to that data. It circumvents
     // borrowing rules by mutating immutable references. This pattern is often
-    // referred to as *interior mutability*.
-    let refcell1 = RefCell::new(5);
-    println!("{:?}", refcell1);
-
-    // `Ref` - immutable borrow
-    let refcell2 = refcell1.borrow();
-
-    // FIXME: Already borrowed
-    // `RefMut` - mutable borrow
-    let mut refcell3 = refcell1.borrow_mut();
-    *refcell3 += 1;
+    // referred to as *interior mutability*, and is useful when you need mutable
+    // data inside an otherwise immutable value.
+    let refcell1: RefCell<i32> = RefCell::new(5);
+    *refcell1.borrow_mut() += 1;
     println!("{:?}", *refcell1.borrow());
+
+    // The following pattern is common when you want to manage shared state that
+    // needs to be updated by multiple methods of a struct but still want to ensure
+    // that the struct itself can be passed around without requiring mutability.
+    // We define a struct that contains a `RefCell`, this allows us to modify
+    // the `u32` value even if the `Counter` struct is immutable.
+    struct Counter {
+        count: RefCell<u32>,
+    }
+
+    impl Counter {
+        fn new() -> Counter {
+            Counter {
+                count: RefCell::new(0),
+            }
+        }
+
+        // The `increment` method borrows the `Counter` struct immutably, and then
+        // borrows the `count` field mutably.
+        fn increment(&self) {
+            // You can think of `borrow_mut` as the `&mut` operator, for the `RefCell`.
+            let mut count = self.count.borrow_mut();
+            *count += 1;
+        }
+
+        // The `get` method borrows the `Counter` struct immutably, and then
+        // borrows the `count` field immutably.
+        fn get(&self) -> u32 {
+            // You can think of `borrow` as the `&` operator, for the `RefCell`.
+            *self.count.borrow()
+        }
+    }
 
     // The `Mutex` type is a mutual exclusion primitive useful for protecting
     // shared data. Mutexes are a way to ensure that only one thread can access
