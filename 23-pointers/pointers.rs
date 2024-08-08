@@ -4,6 +4,7 @@
 // Rust has two types of pointers that are used to used to manage memory and
 // ownership. These are: *owning pointers* (`Box`, `Rc`, `Arc`), and
 // *non-owning pointers* (references: `&`, `&mut`; raw-pointers: `*const`, `*mut`).
+//
 // Owning pointers allocate memory on the heap and are responsible for cleaning
 // up the memory when they go out of scope. Non-owning pointers are used to
 // borrow values without taking ownership of them. They do not manage the memory
@@ -18,6 +19,7 @@ use std::thread;
 
 #[allow(unused_variables, dead_code)]
 fn main() {
+
     // `&` is used to create a reference to a value, and it allows us to
     // *borrow* the value without taking ownership of it. This is also known as
     // a *shared reference*. As such, the lifetime of the reference depends on
@@ -50,23 +52,35 @@ fn main() {
     // is dropped. Choose `Rc` when you want to have multiple owners of the same
     // data in single-threaded context.
     let rc1 = Rc::new(5);
-    println!("reference count of rc1: {}", Rc::strong_count(&rc1));
+    println!(
+        "reference count of rc1: {}",
+        Rc::strong_count(&rc1),
+    );
 
     {
         // `Rc::clone` is used to create a new reference to the same data. It does
         // not create a deep copy of the data, it simply increments the reference
         // count.
         let rc2 = Rc::clone(&rc1);
-        println!("reference count of rc1: {}", Rc::strong_count(&rc1));
+        println!(
+            "reference count of rc1: {}",
+            Rc::strong_count(&rc1),
+        );
 
         // `Rc::clone` can also be called using the `clone` method.
         let rc3 = rc1.clone();
-        println!("reference count of rc1: {}", Rc::strong_count(&rc1));
+        println!(
+            "reference count of rc1: {}",
+            Rc::strong_count(&rc1),
+        );
     }
 
     // The reference count of `rc1` is now 1, since `rc2` and `rc3` have gone out
     // of scope.
-    println!("reference count of rc1: {}", Rc::strong_count(&rc1));
+    println!(
+        "reference count of rc1: {}",
+        Rc::strong_count(&rc1),
+    );
 
     // `Arc` is an atomic reference-counted smart pointer. It is the atomic
     // version of `Rc`, which is safe to use in concurrent contexts. Choose `Arc`
@@ -94,7 +108,10 @@ fn main() {
     thread2.join().unwrap();
 
     // At this point, arc2 and arc3 are out of scope, only arc1 remains
-    println!("reference count of arc1: {}", Arc::strong_count(&arc1));
+    println!(
+        "reference count of arc1: {}",
+        Arc::strong_count(&arc1),
+    );
 
     // `RefCell` (Reference Cell) is a type that enforces the borrowing rules
     // at runtime instead of compile time. It allows you to mutate data even
