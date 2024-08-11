@@ -2,14 +2,13 @@
 // Language: Rust
 //
 // Rust has two types of pointers that are used to used to manage memory and
-// ownership. These are: *owning pointers* (`Box`, `Rc`, `Arc`), and
-// *non-owning pointers* (references: `&`, `&mut`; raw-pointers: `*const`, `*mut`).
-//
-// Owning pointers allocate memory on the heap and are responsible for cleaning
-// up the memory when they go out of scope. Non-owning pointers are used to
+// ownership. These are: *non-owning pointers*
+// (references: `&`, `&mut`; raw-pointers: `*const`, `*mut`). and
+// *owning pointers* (`Box`, `Rc`, `Arc`). *Non-owning* pointers are used to 
 // borrow values without taking ownership of them. They do not manage the memory
 // they point to, they simply provide access to the data, without affecting its
-// ownership.
+// ownership. *Owning pointers* allocate memory on the heap and are responsible
+// for cleaning up the memory when they go out of scope.
 
 use std::cell::RefCell;
 use std::mem::drop;
@@ -19,18 +18,45 @@ use std::thread;
 
 #[allow(unused_variables, dead_code)]
 fn main() {
-
-    // `&` is used to create a reference to a value, and it allows us to
-    // *borrow* the value without taking ownership of it. This is also known as
-    // a *shared reference*. As such, the lifetime of the reference depends on
-    // its owner and is limited to the scope in which it was created.
     let mut x = 5;
 
-    // `r` is a immutable reference to `x`.
-    let r1 = &x;
+    // `&` is used to create a *immutable* reference to the value of `x`. This
+    // allows us to borrow `x` without taking ownership of it. We can use `r1`
+    // to read the value of `x`, but we cannot modify it. You can have multiple
+    // immutable references to a value at the same time.
+    let immut_ref = &x;
 
-    // `r` is a mutable reference to `x`.
-    let r2 = &mut x;
+    // `ref` is used to create a reference to a value. It is often used in
+    // pattern matching to bind a reference to a value. It is similar to `&` but
+    // is used in a different context.
+    let ref immut_ref2 = x;
+
+    // It's particularly useful when working with enums, like `Option` and
+    // `Result`, or custom enums.
+    let some_option = Some(5);
+    match some_option {
+        Some(ref x) => println!("Got a value: {}", x),
+        None => (),
+    }
+
+    // `&mut` is used to create a *mutable* reference to value of `x`. This
+    // allows us to borrow `x` mutably, and modify it. We can only have one
+    // mutable reference to a value at a time.
+    let mut_ref = &mut x;
+    *mut_ref += 1;
+
+    // `ref mut` is used to create a mutable reference to a value. Just like
+    // with `ref`, it is similar to `&mut` but used in a different context it
+    // is typically used in pattern matching to bind a mutable reference to a
+    // value.
+    let ref mut mut_ref2 = x;
+    *mut_ref2 += 1;
+
+    let mut some_other_option = Some(5);
+    match some_other_option {
+        Some(ref mut x) => *x += 1,
+        None => (),
+    }
 
     // The raw pointer `*const T` is a non-owning pointer that does not implement
     // any automatic cleanup. It is a simple C-style pointer that is used when
