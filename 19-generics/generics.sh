@@ -1,5 +1,7 @@
 # Language: shell
-# Generics
 $ rustc generics.rs
 $ ./generics
-Generics
+Success: 200
+Success: OK
+Error: 404
+Error: Not Found
