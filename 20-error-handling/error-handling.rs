@@ -4,14 +4,11 @@
 // Rust provides a concise and expressive error-handling mechanism using the
 // `Result<T, E>` enum. It has two variants: `Ok(T)` for success and `Err(E)` for
 // errors. `T` is the type of the success value, and `E` is the type of the error.
-// In addition, Rust also provides the `Option` type, which
-// is an enum that represents the presence or absence of a value. The `Option`
-// type has two variants: `Some`, which contains a value, and `None`, which
-// represents the absence of a value.
 
 use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
+
     // ### Returning Errors
 
     // To return errors in Rust, we use the `Result<T, E>` type. Here is a simple
