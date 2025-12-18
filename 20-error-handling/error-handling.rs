@@ -4,209 +4,173 @@
 // Rust provides a concise and expressive error-handling mechanism using the
 // `Result<T, E>` enum. It has two variants: `Ok(T)` for success and `Err(E)` for
 // errors. `T` is the type of the success value, and `E` is the type of the error.
-// In addition, Rust also provides the `Option` type, which
-// is an enum that represents the presence or absence of a value. The `Option`
-// type has two variants: `Some`, which contains a value, and `None`, which
-// represents the absence of a value.
 
-use std::error;
-use std::fmt;
-use std::io;
-use std::num::ParseIntError;
+use std::error::Error;
 
-fn main() -> Result<(), io::Error> {
+fn main() -> Result<(), Box<dyn Error>> {
 
-    // Define a function that returns a `Result` type with a success variant
-    // containing a string or an error variant containing an `io::Error`.
-    fn divide(x: i32, y: i32) -> Result<String, io::Error> {
+    // ### Returning Errors
+
+    // To return errors in Rust, we use the `Result<T, E>` type. Here is a simple
+    // function that performs division and returns a `Result<i32, String>`.
+    fn divide(x: i32, y: i32) -> Result<i32, String> {
         if y == 0 {
-            return Err(
-                io::Error::new(
-                    io::ErrorKind::Other, "Division by zero"
-                )
-            );
+            return Err("Division by zero".to_string());
         }
-        Ok(format!("{}", x / y))
+        Ok(x / y)
     }
 
-    // The `Option` type has two variants: `Some`, which contains a value, and
-    // `None`, which represents the absence of a value.
-    fn divide_option(x: i32, y: i32) -> Option<i32> {
-        if y == 0 {
-            return None;
-        }
-        Some(x / y)
+    // Performs checked multiplication; returns an error when an integer
+    // overflow occurs.
+    fn multiply(a: i32, b: i32) -> Result<i32, String> {
+        a.checked_mul(b)
+            .ok_or("Integer overflow on multiplication".to_string())
     }
+
+    // To signify the absence of a value upon success, we can use `Result<()>`.
+    // `Ok(())` indicates success, while `Err(e)` indicates an error. Using
+    // `()`, an empty tuple, signifies the absence of a value.
+    fn do_something() -> Result<(), String> {
+        Ok(())
+    }
+
+    // Uses `Box<dyn Error>` to return different error types uniformly.
+    fn divide_and_multiply(
+        i: i32,
+        j: i32,
+        k: i32,
+    ) -> Result<i32, Box<dyn Error>> {
+        let division = divide(i, j)?;
+        let product = multiply(division, k)?;
+        Ok(product)
+    }
+
+    // Important to note is that we lose the specific error type information
+    // when using `Box<dyn Error>`. For real-world applications, creating custom
+    // error types is often a better approach as it provides more specific
+    // error information.
+
+    // `Result` type alias is a kind of shorthand that can be used to
+    // simplify function signatures. Instead of writing `Result<T, Box<dyn Error>>`
+    // every time, we can define a type alias like this.
+    type MyResult<T> = Result<T, Box<dyn Error>>;
+
+    // Example function using the `MyResult` type alias.
+    fn divide_and_multiply_alias(i: i32, j: i32, k: i32) -> MyResult<i32> {
+        let calc_result = divide_and_multiply(i, j, k)?;
+        Ok(calc_result)
+    }
+
+    // ### Handling Errors
+    // #### Pattern Matching
 
     // One way to handle errors is to use a `match` expression. Here we call
-    // the `divide` function with different values and pattern match on the
-    // result to handle the success and error cases.
+    // the `divide` function and pattern match on the result to handle
+    // the success and error cases.
     match divide(10, 2) {
-        Ok(result) => println!("Result: {}", result),
+        Ok(division_str) => println!("Success: {}", division_str),
         Err(error) => println!("Error: {}", error),
     }
 
-    // The `Option` type can be used to handle cases where a function may or
-    // may not return a value. Here we call the `divide_option` function with
-    // different values and pattern match on the result to handle the `Some`
-    // and `None` cases.
-    match divide_option(10, 0) {
-        Some(result) => println!("Result: {}", result),
-        None => println!("Error: Division by zero"),
+    // Other pattern matching techniques for handling `Result` types are
+    // `if let`, and `let else`. This can be useful when you want to handle
+    // errors early and avoid nested code, and less verbose than `match`.
+
+    // Use `if let` when you want to **handle** both success and error cases.
+    if let Ok(division_str) = divide(10, 2) {
+        println!("if let success: {}", division_str);
+    } else {
+        eprintln!("if let error occurred");
     }
 
-    // Using the `match` statement can become verbose. The `?` operator
-    // offers us a shorthand way to propagate errors up the call stack,
-    // returning them to the caller for handling. It can
-    // only be used in functions returning a `Result`.
-    let result = divide(10, 2)?;
-    println!("Result: {}", result);
+    // Use `let else` when you want to **extract** a value and exit early on error.
+    // Making the success value available for the rest of the function scope.
+    let Ok(division_str) = divide(20, 4) else {
+        return Err("let else encountered an error".into());
+    };
+    println!("let else success: {}", division_str);
 
-    // Typically you'll see multiple `?` operators chained together in a single
-    // expression, or in a function that implements the `Result` trait.
-    fn sum(a: &str, b: &str) -> Result<i32, ParseIntError> {
-        let result = a.parse::<i32>()? + b.parse::<i32>()?;
-        Ok(result)
+    // #### Result Methods
+    // Additionally the `Result<T, E>` type provides several useful methods for
+    // working with results. Here are some commonly used methods:
+
+    // `result.ok()` extracts the value from an `Ok` variant, discarding the
+    // error and returning `Some(value)`.
+    if let Some(value) = divide(15, 3).ok() {
+        println!("Converted to Option: {}", value);
     }
 
-    match sum("13", "37") {
-        Ok(result) => println!("The sum is: {}", result),
-        Err(e) => println!("Error: {}", e),
+    // `result.err()` returns the error value, if any as an `Option<E>`,
+    // discarding the success value.
+    if let Some(err) = divide(10, 0).err() {
+        eprintln!("Handling error with Option: {}", err);
     }
 
-    // `Result<()>` is often used in functions that perform some operation but
-    // do not return a meaningful value upon success. value but may fail. The
-    // `()` type represents an empty tuple and is used to signify the absence
-    // of a value. Return `Ok(())` to indicate success, again `()` is an empty
-    // tuple and signifies the absence of a value.
-    fn do_something() -> Result<(), io::Error> {
-        Ok(())
+    // `result.is_ok()` returns `true` if the result is an `Ok` variant and
+    // `false` if it is an `Err` variant. We can use this method to check if
+    // the result is successful before attempting to extract the value.
+    if divide(10, 2).is_ok() {
+        println!("Division was successful.");
     }
-    do_something()?;
 
-    // `unwrap()` is a method that will extract the contents of `Ok` variant and
-    // assigns it to the variable. If the result is an `Err` variant, it will
-    // panic. This is typically used in cases where the programmer is certain
-    // that the result will be an `Ok` variant.
-    let result = divide(10, 2).unwrap();
-    println!("Result: {}", result);
+    // `result.is_err()` is a method that returns `true` if the result is an `Err`
+    // variant and `false` if it is an `Ok` variant.
+    if divide(10, 0).is_err() {
+        println!("Division failed.");
+    }
 
-    // `expect()` is similar to `unwrap()` but allows you to provide a custom
-    // error message in case of an `Err` variant.
-    let result = divide(10, 2).expect("Division by zero");
-    println!("Result: {}", result);
+    // Another way to handle errors is to propagate them using the `?` operator.
+    // The `?` operator can be used to return the error to the caller if the
+    // result is an `Err` variant. We essentially say "if this is an error,
+    // return it from the current function".
+    let final_result = divide_and_multiply(20, 4, 2)?;
+    println!("Final Result: {}", final_result);
 
-    // `unwrap_or()` is a method that will extract the contents of the `Ok`
+    // #### Unwrapping Results
+
+    // `unwrap()` extracts the contents of `Ok` variant and assigns it to the
+    // variable. If the result is an `Err` variant, **it will panic**, so use
+    // with care. This is typically used in cases where the programmer is
+    // certain that the result will be an `Ok` variant.
+    let unwrapped_division = divide(10, 2).unwrap();
+    println!("Unwrapped Result: {}", unwrapped_division);
+
+    // `unwrap_or(fallback)` will extract the contents of the `Ok`
     // variant and assign it to the variable. If the result is an `Err` variant,
     // it will return the default value provided as an argument.
-    let result = divide(10, 0).unwrap_or(
-        "Error: Division by zero".to_string()
-    );
-    println!("{}", result);
+    let value_or_default = divide(10, 2).unwrap_or(0);
+    println!("Value with fallback: {}", value_or_default);
 
-    // We can declare a custom error types by defining a struct that implements
-    // the `std::error::Error` trait. The `Error` trait requires the `Display`
-    // trait to be implemented for the custom error type.
-    #[derive(Debug)]
-    struct CustomError {
-        message: String,
-    }
+    // `unwrap_or_else(fallback_fn)` will extract the contents of the `Ok`
+    // variant and assign it to the variable. If the result is an `Err`
+    // variant, it will call the provided closure and return its result.
+    // This is useful for providing a computed fallback value based on the error.
+    let computed_fallback = divide(10, 0).unwrap_or_else(|err| {
+        eprintln!("Error occurred: {}. Providing default value.", err);
+        -1
+    });
+    println!("Computed Fallback: {}", computed_fallback);
 
-    impl fmt::Display for CustomError {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f, "{}", self.message)
-        }
-    }
+    // `expect(message)` is similar to `unwrap()` but allows you to provide a custom
+    // error message in case of an `Err` variant.
+    let expected_value = divide(10, 2).expect("Division should succeed");
+    println!("Expected Value: {}", expected_value);
 
-    impl error::Error for CustomError {}
+    // #### Mapping Results
 
-    #[derive(Debug)]
-    struct AnotherCustomError;
+    // `map(convert_fn)` allows to change the value in the `Result` only if
+    // it is an `Ok` variant. The function (usually a closure) is applied
+    // to the contents of the `Ok` variant, and a new `Result` is returned
+    // with the transformed value, if it is an `Err` variant, it is returned unchanged.
+    let result_with_mapped_value = divide(10, 2).map(|val| val * 2);
+    println!("Mapped Value Result: {:?}", result_with_mapped_value);
 
-    impl fmt::Display for AnotherCustomError {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            write!(f, "Another custom error")
-        }
-    }
-
-    impl error::Error for AnotherCustomError {}
-
-    // We can define functions that return custom error types by returning
-    // `Result<T, E>` where `E` is the custom error type.
-    fn f1(i: i32) -> Result<i32, CustomError> {
-        if i < 0 {
-            return Err(CustomError {
-                message: "Custom error".to_string(),
-            });
-        }
-        Ok(i)
-    }
-
-    // We can define multiple custom error types and return them from functions.
-    // Here we define another custom error type `AnotherCustomError` and return
-    // it from a function.
-    fn f2(i: i32) -> Result<i32, AnotherCustomError> {
-        if i > 0 {
-            return Err(AnotherCustomError);
-        }
-        Ok(i)
-    }
-
-    // When a function encounters multiple error types, such as a combination
-    // of `Option<T>` and `Result<T, E>` or different `Result<T, E>` types, we
-    // can use `Box<dyn Error>` to handle them uniformly. `Box<dyn Error>` is a
-    // trait object that can represent any type implementing the `Error` trait,
-    // allowing us to return different error types from the same function.
-    // Important to note is that we lose the specific error type information
-    // when using `Box<dyn Error>`.
-    fn f(i: i32) -> Result<i32, Box<dyn error::Error>> {
-        let result = f1(i)?;
-        let result = f2(result)?;
-        Ok(result)
-    }
-
-    f(10).unwrap();
-
-    // An alternative is to wrap the error type in a custom enum that implements
-    // the `Error` trait. This allows us to define a single error type that
-    // can represent multiple error types.
-    #[derive(Debug)]
-    enum CustomErrorEnum {
-        Custom(CustomError),
-        Another(AnotherCustomError),
-    }
-
-    impl fmt::Display for CustomErrorEnum {
-        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            match self {
-                CustomErrorEnum::Custom(e) => write!(
-                    f, "{}", e,
-                ),
-                CustomErrorEnum::Another(e) => write!(
-                    f, "{}", e,
-                ),
-            }
-        }
-    }
-
-    impl error::Error for CustomErrorEnum {}
-
-    // We can define functions that return custom error types by returning
-    // `Result<T, E>` where `E` is the custom error type.
-    fn g(i: i32) -> Result<i32, CustomErrorEnum> {
-        if i < 0 {
-            return Err(CustomErrorEnum::Custom(
-                CustomError{message: "Custom error".to_string()}
-            ));
-        } else if i > 100 {
-            return Err(CustomErrorEnum::Another(
-                AnotherCustomError
-            ));
-        }
-        Ok(i)
-    }
-
-    g(10).unwrap();
+    // `map_err(convert_fn)` like `map`, but it applies the function to the contents
+    // of the `Err` variant instead. This is useful for transforming error types
+    // or adding additional context to errors.
+    let result_with_mapped_err =
+        divide(10, 0).map_err(|e| format!("Custom error: {}", e));
+    println!("Mapped Error Result: {:?}", result_with_mapped_err);
 
     Ok(())
 }
