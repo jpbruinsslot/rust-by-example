@@ -30,7 +30,7 @@ fn main() {
     // Implement the `Shape` trait for the `Circle` struct.
     impl Shape for Circle {
         fn area(&self) -> f64 {
-            3.4 * self.radius * self.radius
+            3.14 * self.radius * self.radius
         }
     }
 
