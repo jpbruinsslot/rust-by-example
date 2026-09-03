@@ -16,7 +16,7 @@ fn main() {
     println!("Adding two numbers: {}", addition_v1(1, 2));
 
     // The return type can be inferred by the compiler, so it can be omitted.
-    // Since it is a single expression, the semicolon can be omitted as well.
+    // Since it is a single expression, the curly braces can be omitted as well.
     let addition_v2 = |c: i32, d: i32| c + d;
     println!("Adding two numbers: {}", addition_v2(2, 3));
 
